@@ -16,12 +16,16 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
     private final float NEAR  = 0.1F;
     public static final int DISTANCE = 6;
 
-    private static float rotateX = 1F;
+    private static float rotateX = 0;
     private static float rotateY = 0;
     private static float rotateZ = 0;
 
     private ArrayList<Vector3D> points = Donut.getDonut(1, 3);
     private static Vector3D light = new Vector3D(0, 20, 7);
+    private Illuminate illuminator = new Illuminate();
+
+    private static int frames = 0;
+    private static int fps = 0;
 
     Timer t = new Timer(1, this);
 
@@ -35,6 +39,7 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
         frame.pack();
         frame.add(new View());
         frame.setVisible(true);
+        fps();
     }
 
     public void paintComponent(Graphics g) {
@@ -49,7 +54,7 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
         g.setFont(font);
 
         for (Vector3D v : points) {
-            Vector3D projectedPoint = Tools.projection(v, Tools.projM(fov, FAR, NEAR));
+            Vector3D projectedPoint = Util.projection(v, Util.projM(fov, FAR, NEAR));
 
             // Centers the projected points, and rounds to nearest scale value.
             int dx = (int) (Math.round((WIDTH /2. + projectedPoint.x)/PIXEL_SCALE) * PIXEL_SCALE);
@@ -60,10 +65,10 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
             if (dx >= 0 && dx < WIDTH && dy > 0 && dy < HEIGHT) {
                 if (ooz > zBuffer[dx][dy]) {
                     zBuffer[dx][dy] = ooz;
-                    Vector3D lightRay = Tools.vectorSubtract(v, light);
-                    Tools.normalize(lightRay);
-                    float dotP = Tools.dotP(lightRay, v.normal);
-                    grid[dx][dy] = Brightness.getBrightness(dotP);
+                    Vector3D lightRay = Util.vectorSubtract(v, light);
+                    Util.normalize(lightRay);
+                    float dotP = Util.dotP(lightRay, v.normal);
+                    grid[dx][dy] = illuminator.getBrightness(dotP);
                 }
             }
         }
@@ -76,14 +81,30 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
                 }
             }
         }
+
+        g.drawString("FPS | " + fps, 10, 20);
+
+        frames++;
         t.start();
+    }
+
+    public synchronized void fps() {
+        try {
+            while (true) {
+                Thread.sleep(1000);
+                fps = frames;
+                frames = 0;
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         for (Vector3D v : points) {
-            Tools.rotate(v, rotateX, rotateY, rotateZ);
-            Tools.rotate(v.normal, rotateX, rotateY, rotateZ);
+            Util.rotate(v, rotateX, rotateY, rotateZ);
+            Util.rotate(v.normal, rotateX, rotateY, rotateZ);
         }
         repaint();
     }
@@ -93,9 +114,9 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
         int key = e.getKeyCode();
         switch (key) {
             // Change rotation speed
-            case KeyEvent.VK_1 -> rotateX += 0.1;
-            case KeyEvent.VK_2 -> rotateY += 0.1;
-            case KeyEvent.VK_3 -> rotateZ += 0.1;
+            case KeyEvent.VK_1 -> rotateX += 0.001F;
+            case KeyEvent.VK_2 -> rotateY += 0.001F;
+            case KeyEvent.VK_3 -> rotateZ += 0.001F;
 
             // Move light point
             case KeyEvent.VK_A -> light.setLocation(light.x += 3, light.y, light.z);

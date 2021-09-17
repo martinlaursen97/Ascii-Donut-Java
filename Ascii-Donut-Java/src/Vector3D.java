@@ -16,6 +16,7 @@ public class Vector3D {
         this.y = v.y;
         this.z = v.z;
         this.normal = normal;
+        Util.normalize(this.normal);
     }
 
     Vector3D(Vector3D v) {
