@@ -2,8 +2,8 @@ import java.util.ArrayList;
 
 public class Donut {
     private static final float TWO_PI = 6.28318F;
-    private static final float INC_A = 0.065F;
-    private static final float INC_B = 0.01F;
+    private static final float INC_A = 0.060F;
+    private static final float INC_B = 0.0095F;
 
     private static ArrayList<Vector3D> getCircle(int radius, int offset) {
         ArrayList<Vector3D> points = new ArrayList<>();

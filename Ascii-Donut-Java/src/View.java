@@ -4,7 +4,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 public class View extends JPanel implements ActionListener, KeyListener, MouseWheelListener {
-    private final String NAME = "Rotating donut";
+    private final String NAME = "Rotating Donut";
     public static final int WIDTH  = 800;
     public static final int HEIGHT = 800;
     private static final int PIXEL_SCALE  = 13;
@@ -24,10 +24,12 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
     private static Vector3D light = new Vector3D(0, 20, 7);
     private Illuminate illuminator = new Illuminate();
 
+    private static boolean ascii = true;
+
     private static int frames = 0;
     private static int fps = 0;
 
-    Timer t = new Timer(1, this);
+    Timer t = new Timer(0, this);
 
     void run() {
         JFrame frame = new JFrame(NAME);
@@ -68,16 +70,26 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
                     Vector3D lightRay = Util.vectorSubtract(v, light);
                     Util.normalize(lightRay);
                     float dotP = Util.dotP(lightRay, v.normal);
-                    grid[dx][dy] = illuminator.getBrightness(dotP);
+
+                    if (ascii) {
+                        grid[dx][dy] = illuminator.getBrightness(dotP);
+                    } else {
+                        int gradient = (int) Math.toDegrees(-dotP) + 60;
+                        g.setColor(new Color(gradient, gradient, gradient));
+                        g.fillRect(dx, dy, PIXEL_SCALE, PIXEL_SCALE);
+                    }
                 }
             }
         }
 
         g.setColor(Color.WHITE);
-        for (int x = 0; x < WIDTH; x++) {
-            for (int y = 0; y < HEIGHT; y++) {
-                if (grid[x][y] != 0) {
-                    g.drawString(String.valueOf(grid[x][y]), x, y);
+
+        if (ascii) {
+            for (int x = 0; x < WIDTH; x++) {
+                for (int y = 0; y < HEIGHT; y++) {
+                    if (grid[x][y] != 0) {
+                        g.drawString(String.valueOf(grid[x][y]), x, y);
+                    }
                 }
             }
         }
@@ -141,6 +153,9 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
                 rotateY = 0;
                 rotateZ = 0;
             }
+
+            // Switch between ascii and colored pixels
+            case KeyEvent.VK_T -> ascii = !ascii;
         }
     }
 
