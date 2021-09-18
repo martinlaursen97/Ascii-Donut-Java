@@ -22,7 +22,7 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
 
     private ArrayList<Vector3D> points = Donut.getDonut(1, 3);
     private static Vector3D light = new Vector3D(0, 20, 7);
-    private Illuminate illuminator = new Illuminate();
+    private Shader shader = new Shader();
 
     private static boolean ascii = true;
 
@@ -72,7 +72,7 @@ public class View extends JPanel implements ActionListener, KeyListener, MouseWh
                     float dotP = Util.dotP(lightRay, v.normal);
 
                     if (ascii) {
-                        grid[dx][dy] = illuminator.getBrightness(dotP);
+                        grid[dx][dy] = shader.getBrightness(dotP);
                     } else {
                         int gradient = (int) Math.toDegrees(-dotP) + 60;
                         g.setColor(new Color(gradient, gradient, gradient));
